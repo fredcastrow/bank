@@ -17,10 +17,10 @@ public class CustomerService {
 		customerDAO = new CustomerDAOImpl();
 	}
 	
-	public int createCustomer(String cust_fname, String cust_lname, String cust_log_id, String cust_log_pw) {
+	public int createCustomer(int cust_bank_id, String cust_fname, String cust_lname, String cust_log_id, String cust_log_pw) {
 		int count = 1;
 		
-		Customer customer = new Customer(cust_fname, cust_lname, cust_log_id, cust_log_pw);
+		Customer customer = new Customer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw);
 		
 		try (Connection connection = ConnectionUtil.getConnection()) {
 			connection.setAutoCommit(false);

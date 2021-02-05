@@ -169,8 +169,6 @@ public class EmployeeMenu implements Menu{
 						pstmt.setInt(2, emp_bank_id);
 						pstmt.setInt(3, acct_cust_own_id);
 
-						Log.info("before check for NOT approved: " + emp_id + " " + acct_id + " " + emp_bank_id + " " + acct_cust_own_id);
-
 						rs = pstmt.executeQuery();
 						
 						rs.next();
@@ -195,24 +193,9 @@ public class EmployeeMenu implements Menu{
 							pstmt.setInt(3, emp_bank_id);
 							pstmt.setInt(4, acct_cust_own_id);
 							
-							Log.info("before update: " + emp_id + " " + acct_id + " " + emp_bank_id + " " + acct_cust_own_id);
-							
 							acct_count = pstmt.executeUpdate();
 
-/*							
-
-// set autocommit off							
-							sql = "UPDATE bank.account SET ";
-							sql += "acct_approved = TRUE, ";
-							sql += "acct_approving_emp_id = " + emp_id + ", ";
-							sql += "acct_approval_date = current_timestamp(0), ";
-							sql += "acct_current_bal = acct_initial_deposit_amt ";
-							sql += "WHERE acct_id = " + acct_id + " AND acct_owner_type = 'C' AND acct_bank_id = " + emp_bank_id + " AND acct_cust_own_id = " + acct_cust_own_id + " AND acct_approved IS NULL";
-							
-							Statement statement = connection.createStatement();
-							statement.executeUpdate(sql);
- */
-							
+// set autocommit off?							
 // create a Transaction Model, Service, DAO and DALImpl
 							
 							sql = "INSERT INTO bank.transaction ( tran_acct_id, tran_bank_id, tran_date, tran_type, tran_amt) ";
@@ -223,7 +206,6 @@ public class EmployeeMenu implements Menu{
 							pstmt.setInt( 2, emp_bank_id );
 							pstmt.setFloat(3, acct_initial_deposit_amt);
 
-							Log.info("before insert: " + emp_id + " " + acct_id + " " + emp_bank_id + " " + acct_cust_own_id);
 							account_count = pstmt.executeUpdate();
 // commit
 // set autocommit on?

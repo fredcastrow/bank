@@ -28,6 +28,8 @@ public class LoginMenu implements Menu{
 
 		int cust_bank_id = 0;
 		int cust_id = 0;
+		String emp_log_id = new String();
+		String emp_log_pw = new String();
 		int emp_bank_id = 0;
 		int emp_id = 0;
 
@@ -103,8 +105,6 @@ public class LoginMenu implements Menu{
 				case 3:
 					boolean employee_found = false;
 
-					String emp_log_id = new String();
-					String emp_log_pw = new String();
 					connection = null;
 					
 					try {
@@ -156,8 +156,6 @@ public class LoginMenu implements Menu{
 					break;
 
 				case 4:
-//					String cust_fname, cust_lname, cust_log_id, cust_log_pw;
-					
 					Log.info("");
 					Log.info("==============");
 					Log.info("[NEW Customer]");
@@ -170,8 +168,11 @@ public class LoginMenu implements Menu{
 					cust_log_id = sc.nextLine();
 					Log.info("Enter Customer Log Password:");
 					cust_log_pw = sc.nextLine();
-					
-					customerService.createCustomer(cust_fname, cust_lname, cust_log_id, cust_log_pw);
+
+// REMOVE HARD CODED BANK ID
+// HOW DO WE KNOW WHAT BANK WE ARE IN?
+					cust_bank_id = 1;
+					customerService.createCustomer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw);
 
 					Log.info("[Customer " + cust_fname + " " + cust_lname +" created]");
 					Log.info("++++++++++++++++++++++++++++++");
