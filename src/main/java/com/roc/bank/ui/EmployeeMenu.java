@@ -27,6 +27,7 @@ public class EmployeeMenu implements Menu{
 			Application.Log.info("2.) List Customers");
 			Application.Log.info("3.) List Accounts for a Customer");
 			Application.Log.info("4.) Approve Account for a Customer");
+			Application.Log.info("5.) List Transaction Log");
 /*
 			Application.Log.info("5.) Apply for a new Account");
 			Application.Log.info("6.) View Account Balance");
@@ -209,6 +210,69 @@ public class EmployeeMenu implements Menu{
 // commit
 // set autocommit on?
 						}
+					} catch (SQLException e) {
+						Application.Log.info("SQLException: " + e.getMessage());
+		//				throw new SQLException("An issue occurred when trying to connect to.
+					}
+					break;
+					
+				case 5:
+/*
+					int cust_id = 0, acct_id = 0;
+					String cust_fname = "", cust_lname = "";
+					float acct_initial_deposit_amt = 0;
+					boolean acct_approved;
+					int account_count = 0;
+*/
+					int transaction_count = 0;
+					int tran_id = 0;
+					int tran_acct_id = 0;
+					Date tran_date;
+					String tran_type;
+					int tran_transfer_from_acct_id, tran_transfer_to_acct_id;
+					float tran_amt;
+					
+					try {
+						connection = ConnectionUtil.getConnection();
+					} catch (DatabaseConnectionException e) {
+						Application.Log.info("DatabaseConnectionException: " + e.getMessage());
+					}
+/*
+					Application.Log.info("Enter Customer ID:");
+					cust_id = Integer.parseInt(Application.sc.nextLine());
+*/					
+
+					try {
+						String sql = "SELECT tran_id, tran_acct_id, tran_date, tran_type, tran_transfer_from_acct_id, tran_transfer_to_acct_id, tran_amt  ";
+								sql += "FROM bank.transaction ";
+								sql += "ORDER BY tran_id ";
+						PreparedStatement pstmt = connection.prepareStatement(sql);
+						rs = pstmt.executeQuery();
+						
+						while( rs.next() ) {
+							transaction_count ++;
+							if( transaction_count == 1 ) {
+								Application.Log.info("");
+								Application.Log.info("=======================");
+								Application.Log.info("[Transaction List]");
+								Application.Log.info("=======================");
+							}
+							
+							tran_id = rs.getInt(1);
+							tran_acct_id = rs.getInt(2);
+							tran_date = rs.getDate(3);
+							tran_type = rs.getString(4);
+							tran_transfer_from_acct_id = rs.getInt(5);
+							tran_transfer_to_acct_id = rs.getInt(6);
+							tran_amt = rs.getFloat(7);
+
+							Application.Log.info("[" +tran_id + "] " + tran_acct_id + " " + tran_date + " [" + tran_type + "] " + tran_transfer_from_acct_id + " " + tran_transfer_to_acct_id + " " + tran_amt);
+						}
+						
+						if( transaction_count == 0 ) {
+							Application.Log.info("[No Transactions found]");
+						}
+						
 					} catch (SQLException e) {
 						Application.Log.info("SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.

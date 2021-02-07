@@ -258,6 +258,9 @@ public class CustomerMenu implements Menu {
 						Application.Log.info("Enter Amount to Transfer:");
 						try {xfer_amt = Float.parseFloat(Application.sc.nextLine());
 						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
+
+// SET AUTOCOMMIT OFF	
+						connection.setAutoCommit(false);
 						
 // MAKE SURE ACCONT IS APPROVED						
 						sql = "SELECT count(*) ";
@@ -273,6 +276,7 @@ public class CustomerMenu implements Menu {
 						account_count = rs.getInt(1);
 						if( account_count == 0) {
 							Application.Log.info("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to transfer from]");
+							connection.rollback();
 							break;
 						}
 						
@@ -312,6 +316,7 @@ public class CustomerMenu implements Menu {
 						account_count = rs.getInt(1);
 						if( account_count == 0) {
 							Application.Log.info("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to transfer to]");
+							connection.rollback();
 							break;
 						}
 						
@@ -336,6 +341,16 @@ public class CustomerMenu implements Menu {
 						pstmt.setFloat(3, xfer_amt);
 	
 						account_count = pstmt.executeUpdate();
+//COMMIT
+						connection.commit();
+						break;
+					} catch (SQLException e) {
+						Application.Log.info("SQLException: " + e.getMessage());
+					}
+					
+					try {
+//ROLLBACK				
+						connection.rollback();
 					} catch (SQLException e) {
 						Application.Log.info("SQLException: " + e.getMessage());
 					}
