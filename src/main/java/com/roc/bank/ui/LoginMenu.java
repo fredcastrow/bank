@@ -1,11 +1,10 @@
 package com.roc.bank.ui;
 
-import java.sql.PreparedStatement;
+//import java.sql.PreparedStatement;
 
-import org.apache.log4j.Logger;
+import com.roc.bank.main.Application;
 
 import com.roc.bank.exceptions.DatabaseConnectionException;
-import com.roc.bank.main.Application;
 import com.roc.bank.util.ConnectionUtil;
 
 import java.sql.*;
@@ -15,8 +14,6 @@ import com.roc.bank.services.CustomerService;
 public class LoginMenu implements Menu{
 	public void display(){}
 	
-	public static Logger Log=Logger.getLogger(Application.class);
-
 	public CustomerService customerService;
 	public LoginMenu() {
 		customerService = new CustomerService();
@@ -34,18 +31,18 @@ public class LoginMenu implements Menu{
 		int emp_id = 0;
 
 		do {
-			Log.info("");
-			Log.info("=================");
-			Log.info("[BANK LOGIN MENU]");
-			Log.info("=================");
-			Log.info("1.) Exit Application");
-			Log.info("2.) Customer Login");
-			Log.info("3.) Employee Login");
-			Log.info("4.) Create Customer Login");
-			Log.info("[Enter a choice between 1 and 4]");
+			Application.Log.info("");
+			Application.Log.info("=================");
+			Application.Log.info("[BANK LOGIN MENU]");
+			Application.Log.info("=================");
+			Application.Log.info("1.) Exit Application");
+			Application.Log.info("2.) Customer Login");
+			Application.Log.info("3.) Employee Login");
+			Application.Log.info("4.) Create Customer Login");
+			Application.Log.info("[Enter a choice between 1 and 4]");
 			
 			try {
-				choice = Integer.parseInt(Menu.sc.nextLine());
+				choice = Integer.parseInt(Application.sc.nextLine());
 			} catch (NumberFormatException e) {
 			}
 			
@@ -63,17 +60,17 @@ public class LoginMenu implements Menu{
 					try {
 						connection = ConnectionUtil.getConnection();
 					} catch (DatabaseConnectionException e) {
-						Log.info("DatabaseConnectionException: " + e.getMessage());
+						Application.Log.info("DatabaseConnectionException: " + e.getMessage());
 					}
 					
 					String cust_fname = new String();
 					String cust_lname = new String();
 
 					try {
-						Log.info("Enter Login ID:");
-						cust_log_id = Menu.sc.nextLine();
-						Log.info("Enter Login Password:");
-						cust_log_pw = Menu.sc.nextLine();
+						Application.Log.info("Enter Login ID:");
+						cust_log_id = Application.sc.nextLine();
+						Application.Log.info("Enter Login Password:");
+						cust_log_pw = Application.sc.nextLine();
 						
 						String sql = "SELECT cust_fname, cust_lname, cust_id, cust_bank_id ";
 						sql += "FROM bank.customer ";
@@ -84,7 +81,7 @@ public class LoginMenu implements Menu{
 						rs = pstmt.executeQuery();
 						
 						if( !rs.next() ) {
-							Log.info("[Invalid ID or Password]");
+							Application.Log.info("[Invalid ID or Password]");
 							break;
 						} else {
 							cust_fname = rs.getString(1);
@@ -92,13 +89,13 @@ public class LoginMenu implements Menu{
 							cust_id = rs.getInt(3);
 							cust_bank_id = rs.getInt(4);
 							
-							Log.info("[Hello customer " + cust_fname + " " + cust_lname + "]");
+							Application.Log.info("[Hello customer " + cust_fname + " " + cust_lname + "]");
 
 							Menu customerMenu = new CustomerMenu();
 							customerMenu.display( cust_bank_id, cust_id );
 						}
 					} catch (SQLException e) {
-						Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("SQLException: " + e.getMessage());
 //						throw new SQLException("An issue occurred when trying to connect to the database");
 					}
 					break;
@@ -110,17 +107,17 @@ public class LoginMenu implements Menu{
 					try {
 						connection = ConnectionUtil.getConnection();
 					} catch (DatabaseConnectionException e) {
-						Log.info("DatabaseConnectionException: " + e.getMessage());
+						Application.Log.info("DatabaseConnectionException: " + e.getMessage());
 					}
 					
 					String emp_fname = new String();
 					String emp_lname = new String();
 
 					try {
-						Log.info("Enter Login ID:");
-						emp_log_id = (String) Menu.sc.nextLine();
-						Log.info("Enter Login Password:");
-						emp_log_pw = (String) Menu.sc.nextLine();
+						Application.Log.info("Enter Login ID:");
+						emp_log_id = (String) Application.sc.nextLine();
+						Application.Log.info("Enter Login Password:");
+						emp_log_pw = (String) Application.sc.nextLine();
 
 						String sql = "SELECT emp_fname, emp_lname, emp_id, emp_bank_id ";
 						sql += "FROM bank.employee ";
@@ -132,7 +129,7 @@ public class LoginMenu implements Menu{
 						
 						employee_found = rs.next();
 						if( !employee_found) {
-							Log.info("[Invalid ID or Password]");
+							Application.Log.info("[Invalid ID or Password]");
 							break;
 						}
 						
@@ -141,9 +138,9 @@ public class LoginMenu implements Menu{
 						emp_id = rs.getInt(3);
 						emp_bank_id = rs.getInt(4);
 						
-						Log.info("[Hello employee " + emp_fname + " " + emp_lname + "]");
+						Application.Log.info("[Hello employee " + emp_fname + " " + emp_lname + "]");
 					} catch (SQLException e) {
-						Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("SQLException: " + e.getMessage());
 //						throw new SQLException("An issue occurred when trying to connect to the database");
 					}
 
@@ -151,35 +148,35 @@ public class LoginMenu implements Menu{
 						Menu employeeMenu = new EmployeeMenu();
 						employeeMenu.display( emp_id, emp_bank_id );
 					} else {
-						Log.info("[Invalid ID or Password]");
+						Application.Log.info("[Invalid ID or Password]");
 					}
 					break;
 
 				case 4:
-					Log.info("");
-					Log.info("==============");
-					Log.info("[NEW Customer]");
-					Log.info("==============");
-					Log.info("Enter Customer First Name:");
-					cust_fname = sc.nextLine();
-					Log.info("Enter Customer Last Name:");
-					cust_lname = sc.nextLine();
-					Log.info("Enter Customer Log ID:");
-					cust_log_id = sc.nextLine();
-					Log.info("Enter Customer Log Password:");
-					cust_log_pw = sc.nextLine();
+					Application.Log.info("");
+					Application.Log.info("==============");
+					Application.Log.info("[NEW Customer]");
+					Application.Log.info("==============");
+					Application.Log.info("Enter Customer First Name:");
+					cust_fname = Application.sc.nextLine();
+					Application.Log.info("Enter Customer Last Name:");
+					cust_lname = Application.sc.nextLine();
+					Application.Log.info("Enter Customer Log ID:");
+					cust_log_id = Application.sc.nextLine();
+					Application.Log.info("Enter Customer Log Password:");
+					cust_log_pw = Application.sc.nextLine();
 
 // REMOVE HARD CODED BANK ID
 // HOW DO WE KNOW WHAT BANK WE ARE IN?
 					cust_bank_id = 1;
 					customerService.createCustomer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw);
 
-					Log.info("[Customer " + cust_fname + " " + cust_lname +" created]");
-					Log.info("++++++++++++++++++++++++++++++");
+					Application.Log.info("[Customer " + cust_fname + " " + cust_lname +" created]");
+					Application.Log.info("++++++++++++++++++++++++++++++");
 					break;
 					
 				default:
-					Log.info("[No valid choice entered, please try again]");
+					Application.Log.info("[No valid choice entered, please try again]");
 			}
 		} while (choice != 1);
 	}

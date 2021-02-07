@@ -16,7 +16,7 @@ public class ConnectionUtil {
 
 	public static Connection getConnection() throws DatabaseConnectionException {
 		
-		Connection connection = null;
+		Connection connection;// = new Connection();
 		
 		try {
 			DriverManager.registerDriver(new Driver());

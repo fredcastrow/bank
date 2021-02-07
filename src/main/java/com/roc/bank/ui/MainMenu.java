@@ -1,6 +1,6 @@
 // NOT USED
 // LOGIN MENU IS THE TOP LEVEL MENU NOW
-
+/*
 package com.roc.bank.ui;
 
 import org.apache.log4j.Logger;
@@ -51,3 +51,4 @@ public class MainMenu implements Menu{
 	
 	public void display(int cust_bank_id, int cust_id) {}
 }
+*/
