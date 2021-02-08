@@ -1,15 +1,12 @@
 package com.roc.bank.main;
 
 import org.apache.log4j.Logger;
-//import org.postgresql.Driver;
 
-import java.sql.Connection;
-//import java.sql.DriverManager;
-//import java.sql.SQLException;
+//import java.sql.Connection;
 import java.util.Scanner;
 
-import com.roc.bank.util.ConnectionUtil;
-import com.roc.bank.exceptions.DatabaseConnectionException;
+//import com.roc.bank.util.ConnectionUtil;
+//import com.roc.bank.exceptions.DatabaseConnectionException;
 import com.roc.bank.ui.LoginMenu;
 import com.roc.bank.ui.Menu;
 

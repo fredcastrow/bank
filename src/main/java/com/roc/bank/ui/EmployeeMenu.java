@@ -1,11 +1,12 @@
 package com.roc.bank.ui;
 
 import com.roc.bank.main.Application;
-
 import com.roc.bank.util.ConnectionUtil;
 import com.roc.bank.exceptions.DatabaseConnectionException;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class EmployeeMenu implements Menu{
 
@@ -14,8 +15,11 @@ public class EmployeeMenu implements Menu{
 
 	@Override
 	public void display( int emp_id, int emp_bank_id ) {
-		ResultSet rs;
+		ResultSet rs = null;
 		Connection connection = null;
+
+		int account_count = 0;
+		float acct_initial_deposit_amt = 0;
 
 		int choice = 0;
 		do {
@@ -36,7 +40,7 @@ public class EmployeeMenu implements Menu{
 			Application.Log.info("9.) Transfer Money");
 			Application.Log.info("10.) Receive Money");
 */			
-			Application.Log.info("[Enter a choice between 1 and 4]");
+			Application.Log.info("[Enter a choice between 1 and 5]");
 
 			try {
 				choice = Integer.parseInt(Application.sc.nextLine());
@@ -92,9 +96,8 @@ public class EmployeeMenu implements Menu{
 				case 3:
 					int cust_id = 0, acct_id = 0;
 					String cust_fname = "", cust_lname = "";
-					float acct_initial_deposit_amt = 0;
 					boolean acct_approved;
-					int account_count = 0;
+					String acct_status;
 					
 					try {
 						connection = ConnectionUtil.getConnection();
@@ -120,9 +123,9 @@ public class EmployeeMenu implements Menu{
 							account_count ++;
 							if( account_count == 1 ) {
 								Application.Log.info("");
-								Application.Log.info("=======================");
-								Application.Log.info("[Customer Account List]");
-								Application.Log.info("=======================");
+								Application.Log.info("===========[Customer Account List]=========");
+								Application.Log.info("CustID CustName AcctID AcctBal AcctApproved");
+								Application.Log.info("-------------------------------------------");
 							}
 							
 							cust_id = rs.getInt(1);
@@ -131,8 +134,15 @@ public class EmployeeMenu implements Menu{
 							acct_id = rs.getInt(4);
 							acct_initial_deposit_amt = rs.getInt(5);
 							acct_approved = rs.getBoolean(6);
-							Application.Log.info("[" +cust_id + "] " + cust_fname + " " + cust_lname + " [" + acct_id + "] " + acct_initial_deposit_amt + " (" + acct_approved + ")");
+							if( acct_approved) {
+								acct_status = "Approved";
+							}else{
+								acct_status = "NOT Approved";
+							}
+							
+							Application.Log.info("[" +cust_id + "]    " + cust_fname + " " + cust_lname + "    [" + acct_id + "]   " + acct_initial_deposit_amt + "    [" + acct_status + "]");
 						}
+						Application.Log.info("===========================================");
 						
 						if( account_count == 0 ) {
 							Application.Log.info("[No Accounts found for Customer [" + cust_id + "]]");
@@ -146,7 +156,7 @@ public class EmployeeMenu implements Menu{
 					
 				case 4:
 					int acct_cust_own_id = 0;
-					int acct_count = 0;
+					account_count = 0;
 					
 					try {
 						connection = ConnectionUtil.getConnection();
@@ -158,28 +168,28 @@ public class EmployeeMenu implements Menu{
 					acct_cust_own_id = Integer.parseInt(Application.sc.nextLine());
 					Application.Log.info("Enter Customer Account ID:");
 					acct_id = Integer.parseInt(Application.sc.nextLine());
-					
+
 					try {
-						String sql = "SELECT acct_id, acct_initial_deposit_amt ";
+						connection.setAutoCommit(false);
+						String sql = "SELECT acct_initial_deposit_amt ";
 								sql += "FROM bank.account ";
 								sql += "WHERE acct_id = ? AND acct_owner_type = 'C' AND acct_bank_id = ? AND acct_cust_own_id = ? AND acct_approved = FALSE";
-
+								
 						PreparedStatement pstmt = connection.prepareStatement(sql);
 						pstmt.setInt(1, acct_id);
 						pstmt.setInt(2, emp_bank_id);
 						pstmt.setInt(3, acct_cust_own_id);
 
 						rs = pstmt.executeQuery();
+						while( rs.next() ) {
+							account_count ++; 
+							acct_initial_deposit_amt = rs.getFloat(1); 
+						}
 						
-						rs.next();
-						acct_count = rs.getInt(1);
-						acct_initial_deposit_amt = rs.getFloat(2); 
-						
-						if( acct_count == 0 ) {
+						if( account_count == 0 ) {
 							Application.Log.info( "[That is not an Account to be approved]");
 							break;
 						} else {
-
 							sql = "UPDATE bank.account SET ";
 							sql += "acct_approved = TRUE, ";
 							sql += "acct_approving_emp_id = ?, ";
@@ -193,9 +203,8 @@ public class EmployeeMenu implements Menu{
 							pstmt.setInt(3, emp_bank_id);
 							pstmt.setInt(4, acct_cust_own_id);
 							
-							acct_count = pstmt.executeUpdate();
+							account_count = pstmt.executeUpdate();
 
-// set autocommit off?							
 // create a Transaction Model, Service, DAO and DALImpl
 							
 							sql = "INSERT INTO bank.transaction ( tran_acct_id, tran_bank_id, tran_date, tran_type, tran_amt) ";
@@ -207,28 +216,28 @@ public class EmployeeMenu implements Menu{
 							pstmt.setFloat(3, acct_initial_deposit_amt);
 
 							account_count = pstmt.executeUpdate();
-// commit
-// set autocommit on?
+							
+							connection.commit();
+							break;
 						}
 					} catch (SQLException e) {
 						Application.Log.info("SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 					}
+					try {
+						connection.rollback();
+					} catch (SQLException e) {
+						Application.Log.info("SQLException: " + e.getMessage());
+					}
 					break;
 					
 				case 5:
-/*
-					int cust_id = 0, acct_id = 0;
-					String cust_fname = "", cust_lname = "";
-					float acct_initial_deposit_amt = 0;
-					boolean acct_approved;
-					int account_count = 0;
-*/
 					int transaction_count = 0;
 					int tran_id = 0;
 					int tran_acct_id = 0;
 					Date tran_date;
 					String tran_type;
+					int tran_transfer_from_cust_id, tran_transfer_to_cust_id;
 					int tran_transfer_from_acct_id, tran_transfer_to_acct_id;
 					float tran_amt;
 					
@@ -243,7 +252,7 @@ public class EmployeeMenu implements Menu{
 */					
 
 					try {
-						String sql = "SELECT tran_id, tran_acct_id, tran_date, tran_type, tran_transfer_from_acct_id, tran_transfer_to_acct_id, tran_amt  ";
+						String sql = "SELECT tran_id, tran_acct_id, tran_date, tran_type, tran_xfer_from_cust_id, tran_xfer_from_acct_id, tran_xfer_to_cust_id, tran_xfer_to_acct_id, tran_amt  ";
 								sql += "FROM bank.transaction ";
 								sql += "ORDER BY tran_id ";
 						PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -253,21 +262,28 @@ public class EmployeeMenu implements Menu{
 							transaction_count ++;
 							if( transaction_count == 1 ) {
 								Application.Log.info("");
-								Application.Log.info("=======================");
-								Application.Log.info("[Transaction List]");
-								Application.Log.info("=======================");
+								Application.Log.info("===================[Transaction List]==================");
+								Application.Log.info("TranID AcctID TranDate TranType XferFrom XferTo TranAmt");
+								Application.Log.info("-------------------------------------------------------");
 							}
 							
 							tran_id = rs.getInt(1);
 							tran_acct_id = rs.getInt(2);
 							tran_date = rs.getDate(3);
 							tran_type = rs.getString(4);
-							tran_transfer_from_acct_id = rs.getInt(5);
-							tran_transfer_to_acct_id = rs.getInt(6);
-							tran_amt = rs.getFloat(7);
+							tran_transfer_from_cust_id = rs.getInt(5);
+							tran_transfer_from_acct_id = rs.getInt(6);
+							tran_transfer_to_cust_id = rs.getInt(7);
+							tran_transfer_to_acct_id = rs.getInt(8);
+							tran_amt = rs.getFloat(9);
+							
+							final DateTimeFormatter ISO_TIME;
+							String formatted_time;
+							formatted_time = LocalDate.parse(tran_date, ofLocalizedDateTime( ISO_TIME ));
 
-							Application.Log.info("[" +tran_id + "] " + tran_acct_id + " " + tran_date + " [" + tran_type + "] " + tran_transfer_from_acct_id + " " + tran_transfer_to_acct_id + " " + tran_amt);
+							Application.Log.info("[" +tran_id + "]      " + tran_acct_id + "    " + tran_date + " [" + tran_type + "]      " + tran_transfer_from_cust_id + " " + tran_transfer_from_acct_id + "      " + tran_transfer_to_cust_id + " " + tran_transfer_to_acct_id + "      " + tran_amt);
 						}
+						Application.Log.info("=======================================================");
 						
 						if( transaction_count == 0 ) {
 							Application.Log.info("[No Transactions found]");

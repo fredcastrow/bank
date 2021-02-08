@@ -1,15 +1,11 @@
 package com.roc.bank.ui;
 
-//import java.sql.PreparedStatement;
-
 import com.roc.bank.main.Application;
-
-import com.roc.bank.exceptions.DatabaseConnectionException;
-import com.roc.bank.util.ConnectionUtil;
-
-import java.sql.*;
-
 import com.roc.bank.services.CustomerService;
+import com.roc.bank.exceptions.DatabaseConnectionException;
+
+import com.roc.bank.util.ConnectionUtil;
+import java.sql.*;
 
 public class LoginMenu implements Menu{
 	public void display(){}

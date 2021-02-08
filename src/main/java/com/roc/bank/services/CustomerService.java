@@ -17,21 +17,20 @@ public class CustomerService {
 		customerDAO = new CustomerDAOImpl();
 	}
 	
-	public int createCustomer(int cust_bank_id, String cust_fname, String cust_lname, String cust_log_id, String cust_log_pw) {
-		int count = 1;
-		
-		Customer customer = new Customer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw);
+	public Customer createCustomer(int cust_bank_id, String cust_fname, String cust_lname, String cust_log_id, String cust_log_pw) {
+		Customer customer = new Customer();
+		customer = Customer.initializeCustomer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw);
 		
 		try (Connection connection = ConnectionUtil.getConnection()) {
 			connection.setAutoCommit(false);
 			
-			count = customerDAO.createCustomer(customer, connection); // pass connection object into DAO operation
+			customerDAO.createCustomer(customer, connection); // pass connection object into DAO operation
 			
 			connection.commit(); // commit DAO operation changes here
 		} catch (SQLException | DatabaseConnectionException e) {
 			System.out.println(e.getMessage());
 		}
 
-		return count;
+		return customer;
 	}
 }
