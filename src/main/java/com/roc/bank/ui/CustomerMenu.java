@@ -5,11 +5,11 @@ import com.roc.bank.main.Application;
 import com.roc.bank.services.AccountService;
 import com.roc.bank.services.CustomerService;
 import com.roc.bank.util.ConnectionUtil;
-
-//import jdk.internal.org.jline.utils.Log;
+import com.roc.bank.services.TransactionService;
 
 import com.roc.bank.exceptions.DatabaseConnectionException;
 import java.sql.*;
+//import java.util.Date;
 
 public class CustomerMenu implements Menu {
 	@Override
@@ -17,17 +17,18 @@ public class CustomerMenu implements Menu {
 
 	public CustomerService customerService;
 	public AccountService accountService;
+	public TransactionService transactionService;
 
 	public CustomerMenu() {
 		customerService = new CustomerService();
 		accountService = new AccountService();
+		transactionService = new TransactionService();
 	}
 
 //	@Override
 	public void display(int cust_bank_id, int cust_id) {
-		int acct_id = 0;
 		ResultSet rs;
-
+	
 		Connection connection = null;
 		try {
 			connection = ConnectionUtil.getConnection();
@@ -35,8 +36,10 @@ public class CustomerMenu implements Menu {
 		}
 		
 		int account_count = 0;
-		float withdrawal_amt = 0;
+		int acct_id = 0;
+		float withdraw_amt = 0;
 		float deposit_amt = 0;
+		String acct_type = "C";
 
 		String sql;
 		PreparedStatement pstmt;
@@ -49,7 +52,7 @@ public class CustomerMenu implements Menu {
 			Application.Log.info("===============");
 			Application.Log.info("1.) Back");
 			Application.Log.info("2.) Apply for a new Account");
-			Application.Log.info("3.) View Approved Account Balances");
+			Application.Log.info("3.) List Approved Account Balances");
 			Application.Log.info("4.) Make a Deposit");
 			Application.Log.info("5.) Make a Withdrawal");
 			Application.Log.info("6.) Transfer Money");
@@ -68,10 +71,32 @@ public class CustomerMenu implements Menu {
 				case 2:
 //					String account = getCreateAccountInput();
 					
+					Application.Log.info("Enter Account Type (C = Checking, S = Savings:");
+					acct_type = Application.sc.nextLine();
+
 					Application.Log.info("Enter Initial Deposit Amount:");
 					float acct_initial_deposit_amt = Float.parseFloat(Application.sc.nextLine());
 					
-					accountService.createAccount(cust_bank_id, cust_id, acct_initial_deposit_amt);
+					accountService.createAccount(cust_bank_id, cust_id, acct_initial_deposit_amt, acct_type);
+
+					try {
+						sql = "SELECT Max(acct_id) ";
+						sql += "FROM bank.account ";
+						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C'" ;
+						pstmt = connection.prepareStatement(sql);
+						pstmt.setInt(1, cust_bank_id);
+						pstmt.setInt(2, cust_id);
+						rs = pstmt.executeQuery();
+						
+						while( rs.next() ){ acct_id = rs.getInt(1); }
+
+						transactionService.createTransaction( acct_id, cust_bank_id, "O", 0, 0, 0, 0, acct_initial_deposit_amt );
+						
+					} catch (SQLException e) {
+						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
+		//				throw new SQLException("An issue occurred when trying to connect to.
+						break;
+					}
 					
 					Application.Log.info("[Account Request created:  Check back later to for approval status]");
 					Application.Log.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -82,10 +107,11 @@ public class CustomerMenu implements Menu {
 					try {
 						sql = "SELECT Count(*) as AccountCount ";
 						sql += "FROM bank.account ";
-						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE";
+						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE AND acct_type = ?";
 						pstmt = connection.prepareStatement(sql);
 						pstmt.setInt(1, cust_bank_id);
 						pstmt.setInt(2, cust_id);
+						pstmt.setString(3, acct_type);
 						rs = pstmt.executeQuery();
 
 						rs.next();
@@ -99,7 +125,8 @@ public class CustomerMenu implements Menu {
 						
 						sql = "SELECT acct_id, acct_current_bal ";
 						sql += "FROM bank.account ";
-						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE";
+						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE" ;
+//						sql += "ORDER BY acct_id";
 						pstmt = connection.prepareStatement(sql);
 						pstmt.setInt(1, cust_bank_id);
 						pstmt.setInt(2, cust_id);
@@ -156,39 +183,26 @@ public class CustomerMenu implements Menu {
 							Application.Log.info("[Deposit Rejected.  Account " + "(" + acct_id + ") is not an approved account]");
 							break;
 						}
-						
-						sql = "UPDATE bank.account SET ";
-						sql += "acct_current_bal = acct_current_bal + ? ";
-						sql += "WHERE acct_id = ? AND acct_owner_type = 'C' AND acct_bank_id = ? AND acct_cust_own_id = ? AND acct_approved = TRUE";
-						
-						pstmt = connection.prepareStatement(sql);
-						pstmt.setFloat( 1, deposit_amt);
-						pstmt.setInt( 2, acct_id);
-						pstmt.setInt( 3, cust_bank_id );
-						pstmt.setInt( 4, cust_id);
-						account_count = pstmt.executeUpdate();
-						
-						sql = "INSERT INTO bank.transaction ( tran_acct_id, tran_bank_id, tran_date, tran_type, tran_amt) ";
-						sql += "VALUES (?, ?, current_timestamp(0), 'D', ?)";
-						pstmt = connection.prepareStatement(sql);
-				// change this to use getter methods		
-						pstmt.setInt( 1, acct_id );
-						pstmt.setInt( 2, cust_bank_id );
-						pstmt.setFloat(3, deposit_amt);
-						account_count = pstmt.executeUpdate();
+
+						accountService.depositAccount(acct_id, cust_bank_id, deposit_amt);
+						transactionService.createTransaction( acct_id, cust_bank_id, "D", 0, 0, 0, 0, deposit_amt );
 						
 						connection.commit();
 						
 						break;
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
 					}
 					
 					try {
 						connection.rollback();
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[CustomerMenu. rollback] SQLException: " + e.getMessage());
+						break;
 					}
+					Application.Log.info("[Deposit Complete]");
+					Application.Log.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
 					break;
 					
 				case 5:
@@ -198,7 +212,7 @@ public class CustomerMenu implements Menu {
 						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
 						
 						Application.Log.info("Enter Amount to Withdraw:");
-						try {withdrawal_amt = Float.parseFloat(Application.sc.nextLine());
+						try {withdraw_amt = Float.parseFloat(Application.sc.nextLine());
 						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
 						
 						connection.setAutoCommit(false);
@@ -217,29 +231,10 @@ public class CustomerMenu implements Menu {
 							Application.Log.info("[Withddrawal Rejected.  Account " + "(" + acct_id + ") is not an approved account]");
 							break;
 						}
-						
-						sql = "UPDATE bank.account SET ";
-						sql += "acct_current_bal = acct_current_bal - ? ";
-						sql += "WHERE acct_id = ? AND acct_owner_type = 'C' AND acct_bank_id = ? AND acct_cust_own_id = ? AND acct_approved = TRUE";
-						
-						pstmt = connection.prepareStatement(sql);
-						pstmt.setFloat( 1, withdrawal_amt);
-						pstmt.setInt( 2, acct_id);
-						pstmt.setInt( 3, cust_bank_id );
-						pstmt.setInt( 4, cust_id);
-						
-						account_count = pstmt.executeUpdate();
-						
-						sql = "INSERT INTO bank.transaction ( tran_acct_id, tran_bank_id, tran_date, tran_type, tran_amt) ";
-						sql += "VALUES (?, ?, current_timestamp(0), 'W', ?, ?, ?, ?, ?)";
-						pstmt = connection.prepareStatement(sql);
-				// change this to use getter methods		
-						pstmt.setInt( 1, acct_id );
-						pstmt.setInt( 2, cust_bank_id );
-						
-						pstmt.setFloat(3, withdrawal_amt);
-	
-						account_count = pstmt.executeUpdate();
+
+						accountService.withdrawAccount(acct_id, cust_bank_id, withdraw_amt);
+						transactionService.createTransaction( acct_id, cust_bank_id, "W", 0, 0, 0, 0, withdraw_amt );
+
 						connection.commit();
 						break;
 					} catch (SQLException e) {
@@ -293,32 +288,9 @@ public class CustomerMenu implements Menu {
 							connection.rollback();
 							break;
 						}
-						
-						sql = "UPDATE bank.account SET ";
-						sql += "acct_current_bal = acct_current_bal - ? ";
-						sql += "WHERE acct_id = ? AND acct_owner_type = 'C' AND acct_bank_id = ? AND acct_cust_own_id = ? AND acct_approved = TRUE";
-						
-						pstmt = connection.prepareStatement(sql);
-						pstmt.setFloat( 1, xfer_amt);
-						pstmt.setInt( 2, acct_id_xfer_from);
-						pstmt.setInt( 3, cust_bank_id );
-						pstmt.setInt( 4, cust_id);
-						
-						account_count = pstmt.executeUpdate();
-						
-						sql = "INSERT INTO bank.transaction ( tran_acct_id, tran_bank_id, tran_date, tran_type, tran_xfer_from_cust_id, tran_xfer_from_acct_id, tran_xfer_to_cust_id, tran_xfer_to_acct_id, tran_amt ) ";
-						sql += "VALUES (?, ?, current_timestamp(0), 'TF', ?, ?, ?, ?, ?)";
-						pstmt = connection.prepareStatement(sql);
-				// change this to use getter methods		
-						pstmt.setInt( 1, acct_id_xfer_from );
-						pstmt.setInt( 2, cust_bank_id );
-						pstmt.setInt( 3, cust_id );
-						pstmt.setInt( 4, acct_id_xfer_from );
-						pstmt.setInt( 5, cust_id_to );
-						pstmt.setInt( 6, acct_id_xfer_to );
-						pstmt.setFloat(7, xfer_amt);
-	
-						account_count = pstmt.executeUpdate();
+
+						accountService.withdrawAccount(acct_id_xfer_from, cust_bank_id, xfer_amt);
+						transactionService.createTransaction( acct_id_xfer_from, cust_bank_id, "TF", cust_id, acct_id_xfer_from, cust_id_to, acct_id_xfer_to, xfer_amt );
 						
 						sql = "SELECT count(*) ";
 						sql += "FROM bank.account ";
@@ -337,30 +309,8 @@ public class CustomerMenu implements Menu {
 							break;
 						}
 						
-						sql = "UPDATE bank.account SET ";
-						sql += "acct_current_bal = acct_current_bal + ? ";
-						sql += "WHERE acct_id = ? AND acct_owner_type = 'C' AND acct_bank_id = ? AND acct_cust_own_id = ? AND acct_approved = TRUE";
-						
-						pstmt = connection.prepareStatement(sql);
-						pstmt.setFloat( 1, xfer_amt);
-						pstmt.setInt( 2, acct_id_xfer_to);
-						pstmt.setInt( 3, cust_bank_id );
-						pstmt.setInt( 4, cust_id_to);
-						
-						
-						sql = "INSERT INTO bank.transaction ( tran_acct_id, tran_bank_id, tran_date, tran_type, tran_xfer_from_cust_id, tran_xfer_from_acct_id, tran_xfer_to_cust_id, tran_xfer_to_acct_id, tran_amt ) ";
-						sql += "VALUES (?, ?, current_timestamp(0), 'TT', ?, ?, ?, ?, ? )";
-						pstmt = connection.prepareStatement(sql);
-				// change this to use getter methods		
-						pstmt.setInt( 1, acct_id_xfer_to );
-						pstmt.setInt( 2, cust_bank_id );
-						pstmt.setInt( 3, cust_id );
-						pstmt.setInt( 4, acct_id_xfer_from );
-						pstmt.setInt( 5, cust_id_to );
-						pstmt.setInt( 6, acct_id_xfer_to );
-						pstmt.setFloat(7, xfer_amt);
-	
-						account_count = pstmt.executeUpdate();
+						accountService.depositAccount(acct_id_xfer_to, cust_bank_id, xfer_amt);
+						transactionService.createTransaction( acct_id_xfer_to, cust_bank_id, "TT", cust_id, acct_id_xfer_from, cust_id_to, acct_id_xfer_to, xfer_amt );
 
 						connection.commit();
 

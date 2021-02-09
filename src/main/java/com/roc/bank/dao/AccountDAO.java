@@ -7,4 +7,6 @@ import com.roc.bank.models.Account;
 
 public interface AccountDAO {
 	public int createAccount(Account account, Connection connection) throws SQLException;
+	public int depositAccount(Account account, Connection connection) throws SQLException;
+	public int withdrawAccount(Account account, Connection connection) throws SQLException;
 }

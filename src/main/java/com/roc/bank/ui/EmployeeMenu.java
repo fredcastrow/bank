@@ -5,8 +5,11 @@ import com.roc.bank.util.ConnectionUtil;
 import com.roc.bank.exceptions.DatabaseConnectionException;
 
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+//import java.time.LocalDate;
+//import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 
 public class EmployeeMenu implements Menu{
 
@@ -97,7 +100,7 @@ public class EmployeeMenu implements Menu{
 					int cust_id = 0, acct_id = 0;
 					String cust_fname = "", cust_lname = "";
 					boolean acct_approved;
-					String acct_status;
+					String acct_status, acct_type;
 					
 					try {
 						connection = ConnectionUtil.getConnection();
@@ -109,7 +112,7 @@ public class EmployeeMenu implements Menu{
 					cust_id = Integer.parseInt(Application.sc.nextLine());
 
 					try {
-						String sql = "SELECT cust_id, cust_fname, cust_lname, acct_id, acct_initial_deposit_amt, acct_approved, acct_approved ";
+						String sql = "SELECT cust_id, cust_fname, cust_lname, acct_id, acct_initial_deposit_amt, acct_approved, acct_type ";
 								sql += "FROM bank.customer, bank.account ";
 								sql += "WHERE acct_cust_own_id = cust_id ";
 								sql += "AND cust_bank_id = acct_bank_id AND acct_owner_type = 'C' ";
@@ -124,7 +127,7 @@ public class EmployeeMenu implements Menu{
 							if( account_count == 1 ) {
 								Application.Log.info("");
 								Application.Log.info("===========[Customer Account List]=========");
-								Application.Log.info("CustID CustName AcctID AcctBal AcctApproved");
+								Application.Log.info("CustID CustName AcctID AcctBal AcctApproved AcctType");
 								Application.Log.info("-------------------------------------------");
 							}
 							
@@ -134,13 +137,15 @@ public class EmployeeMenu implements Menu{
 							acct_id = rs.getInt(4);
 							acct_initial_deposit_amt = rs.getInt(5);
 							acct_approved = rs.getBoolean(6);
+							acct_type = rs.getString(7);
+
 							if( acct_approved) {
 								acct_status = "Approved";
 							}else{
 								acct_status = "NOT Approved";
 							}
 							
-							Application.Log.info("[" +cust_id + "]    " + cust_fname + " " + cust_lname + "    [" + acct_id + "]   " + acct_initial_deposit_amt + "    [" + acct_status + "]");
+							Application.Log.info("[" +cust_id + "]    " + cust_fname + " " + cust_lname + "    [" + acct_id + "]   " + acct_initial_deposit_amt + "    [" + acct_status + "]" + "    [" + acct_type + "]");
 						}
 						Application.Log.info("===========================================");
 						
@@ -262,9 +267,9 @@ public class EmployeeMenu implements Menu{
 							transaction_count ++;
 							if( transaction_count == 1 ) {
 								Application.Log.info("");
-								Application.Log.info("===================[Transaction List]==================");
-								Application.Log.info("TranID AcctID TranDate TranType XferFrom XferTo TranAmt");
-								Application.Log.info("-------------------------------------------------------");
+								Application.Log.info("==================================[Transaction List]=================================");
+								Application.Log.info("TranID AcctID TranDate       TranType XferFrom(user, acct) XferTo(user, acct) TranAmt");
+								Application.Log.info("-------------------------------------------------------------------------------------");
 							}
 							
 							tran_id = rs.getInt(1);
@@ -276,14 +281,15 @@ public class EmployeeMenu implements Menu{
 							tran_transfer_to_cust_id = rs.getInt(7);
 							tran_transfer_to_acct_id = rs.getInt(8);
 							tran_amt = rs.getFloat(9);
-							
-							final DateTimeFormatter ISO_TIME;
-							String formatted_time;
-							formatted_time = LocalDate.parse(tran_date, ofLocalizedDateTime( ISO_TIME ));
 
-							Application.Log.info("[" +tran_id + "]      " + tran_acct_id + "    " + tran_date + " [" + tran_type + "]      " + tran_transfer_from_cust_id + " " + tran_transfer_from_acct_id + "      " + tran_transfer_to_cust_id + " " + tran_transfer_to_acct_id + "      " + tran_amt);
+							TimeZone tz = TimeZone.getTimeZone("UTC");
+							DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm"); // Quoted "Z" to indicate UTC, no timezone offset
+							df.setTimeZone(tz);
+							String nowAsISO = df.format(tran_date);
+
+							Application.Log.info(" [" +tran_id + "]      " + tran_acct_id + "     " + nowAsISO + " [" + tran_type + "]      " + tran_transfer_from_cust_id + " " + tran_transfer_from_acct_id + "                  " + tran_transfer_to_cust_id + " " + tran_transfer_to_acct_id + "             " + tran_amt);
 						}
-						Application.Log.info("=======================================================");
+						Application.Log.info("=====================================================================================");
 						
 						if( transaction_count == 0 ) {
 							Application.Log.info("[No Transactions found]");

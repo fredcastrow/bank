@@ -31,7 +31,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 			
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
-			Application.Log.info("SQLException: " + e.getMessage());
+			Application.Log.info("[CustomerDAOImpl] SQLException: " + e.getMessage());
 		}
 		
 		count = 1;
