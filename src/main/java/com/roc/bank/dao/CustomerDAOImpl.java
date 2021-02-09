@@ -17,8 +17,8 @@ public class CustomerDAOImpl implements CustomerDAO{
 	public int createCustomer(Customer customer, Connection connection) throws SQLException {
 		int count = 0;
 			
-		String sql = "INSERT INTO bank.customer ( cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw)";
-				sql += "VALUES (?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO bank.customer ( cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw, cust_email )";
+				sql += "VALUES (?, ?, ?, ?, ?, ?)";
 
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -28,6 +28,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 			pstmt.setString(3, Customer.getCust_lname());
 			pstmt.setString(4, Customer.getCust_log_id());
 			pstmt.setString(5, Customer.getCust_log_pw());
+			pstmt.setString(6, Customer.getCust_email());
 			
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {

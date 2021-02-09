@@ -47,9 +47,6 @@ public class LoginMenu implements Menu{
 					break;
 
 				case 2:
-					String cust_log_id = new String();
-					String cust_log_pw = new String();
-					
 					ResultSet rs;
 					Connection connection = null;
 					
@@ -58,6 +55,9 @@ public class LoginMenu implements Menu{
 					} catch (DatabaseConnectionException e) {
 						Application.Log.info("DatabaseConnectionException: " + e.getMessage());
 					}
+					
+					String cust_log_id = new String();
+					String cust_log_pw = new String();
 					
 					String cust_fname = new String();
 					String cust_lname = new String();
@@ -91,7 +91,7 @@ public class LoginMenu implements Menu{
 							customerMenu.display( cust_bank_id, cust_id );
 						}
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[LoginMenu] SQLException: " + e.getMessage());
 //						throw new SQLException("An issue occurred when trying to connect to the database");
 					}
 					break;
@@ -136,7 +136,7 @@ public class LoginMenu implements Menu{
 						
 						Application.Log.info("[Hello employee " + emp_fname + " " + emp_lname + "]");
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[LoginMenu] SQLException: " + e.getMessage());
 //						throw new SQLException("An issue occurred when trying to connect to the database");
 					}
 
@@ -149,6 +149,8 @@ public class LoginMenu implements Menu{
 					break;
 
 				case 4:
+					String cust_email = new String();
+
 					Application.Log.info("");
 					Application.Log.info("==============");
 					Application.Log.info("[NEW Customer]");
@@ -161,11 +163,13 @@ public class LoginMenu implements Menu{
 					cust_log_id = Application.sc.nextLine();
 					Application.Log.info("Enter Customer Log Password:");
 					cust_log_pw = Application.sc.nextLine();
+					Application.Log.info("Enter Customer email address:");
+					cust_email = Application.sc.nextLine();
 
 // REMOVE HARD CODED BANK ID
 // HOW DO WE KNOW WHAT BANK WE ARE IN?
 					cust_bank_id = 1;
-					customerService.createCustomer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw);
+					customerService.createCustomer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw, cust_email);
 
 					Application.Log.info("[Customer " + cust_fname + " " + cust_lname +" created]");
 					Application.Log.info("++++++++++++++++++++++++++++++");

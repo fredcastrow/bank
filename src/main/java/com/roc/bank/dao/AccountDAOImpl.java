@@ -6,7 +6,7 @@ import com.roc.bank.models.Account;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.*;
+//import java.sql.*;
 
 public class AccountDAOImpl implements AccountDAO{
 	
@@ -29,8 +29,17 @@ public class AccountDAOImpl implements AccountDAO{
 			pstmt.setFloat(4, Account.getAcct_initial_deposit_amt());
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
-			Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+			if( e.getMessage().contains("ERROR: new row for relation \"account\" violates check constraint \"account_acct_initial_deposit_amt_check\"")){
+				Application.Log.info("ERROR: Initial Balance can not be negative.");
+			}else {
+				Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+			}
+			return 0;
 		}
+		
+		Application.Log.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+		Application.Log.info("[Account Request created:  Check back later to for approval status]");
+		Application.Log.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
 		return count;
 	}
@@ -51,7 +60,11 @@ public class AccountDAOImpl implements AccountDAO{
 			
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
-			Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+			if( e.getMessage().contains("ERROR: new row for relation \"account\" violates check constraint \"account_acct_current_bal_check\"")) {
+				Application.Log.info("Account Balance can not be negative");
+			}else {
+				Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+			}
 		}
 		
 		return count;
@@ -73,7 +86,11 @@ public class AccountDAOImpl implements AccountDAO{
 			
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
-			Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+			if( e.getMessage().contains("ERROR: new row for relation \"account\" violates check constraint \"account_acct_current_bal_check\"")) {
+				Application.Log.info("Account Balance can not be negative");
+			}else {
+				Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+			}
 		}
 		
 		return count;

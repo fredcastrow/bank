@@ -76,7 +76,7 @@ public class CustomerMenu implements Menu {
 
 					Application.Log.info("Enter Initial Deposit Amount:");
 					float acct_initial_deposit_amt = Float.parseFloat(Application.sc.nextLine());
-					
+
 					accountService.createAccount(cust_bank_id, cust_id, acct_initial_deposit_amt, acct_type);
 
 					try {
@@ -90,7 +90,7 @@ public class CustomerMenu implements Menu {
 						
 						while( rs.next() ){ acct_id = rs.getInt(1); }
 
-						transactionService.createTransaction( acct_id, cust_bank_id, "O", 0, 0, 0, 0, acct_initial_deposit_amt );
+						transactionService.createTransaction( acct_id, cust_bank_id, "O", 0, 0, 0, 0, acct_initial_deposit_amt, "" );
 						
 					} catch (SQLException e) {
 						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
@@ -98,8 +98,8 @@ public class CustomerMenu implements Menu {
 						break;
 					}
 					
-					Application.Log.info("[Account Request created:  Check back later to for approval status]");
-					Application.Log.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+//					Application.Log.info("[Account Request created:  Check back later to for approval status]");
+//					Application.Log.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
 					break;
 					
@@ -123,7 +123,7 @@ public class CustomerMenu implements Menu {
 							account_count = rs.getInt(1);
 						}
 						
-						sql = "SELECT acct_id, acct_current_bal ";
+						sql = "SELECT acct_id, acct_current_bal, acct_type ";
 						sql += "FROM bank.account ";
 						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE" ;
 //						sql += "ORDER BY acct_id";
@@ -139,19 +139,28 @@ public class CustomerMenu implements Menu {
 							account_count++;
 							if( account_count == 1) {
 								Application.Log.info("");
-								Application.Log.info("======================");
-								Application.Log.info("[Approved Account IDs]");
-								Application.Log.info("======================");
+								Application.Log.info("================================================");
+								Application.Log.info("              [Approved Account IDs]");
+								Application.Log.info("================================================");
 							}
 							acct_id = rs.getInt(1);
-							acct_initial_deposit_amt = rs.getFloat(2); 
-							Application.Log.info("Account ID: " + acct_id + " Balance = " + acct_initial_deposit_amt);
+							acct_initial_deposit_amt = rs.getFloat(2);
+							acct_type = rs.getString(3);
+							String acct_type_desc = "Unknown";
+							
+							if( acct_type.equals("C")) {
+								acct_type_desc = "Checking";
+							}else if( acct_type.equals("S")) {
+								acct_type_desc = "Savings ";
+							}
+							
+							Application.Log.info( "Account ID: " + acct_id + "  Type: " + acct_type_desc + "  Balance = " + acct_initial_deposit_amt );
 						}
 						if( account_count == 0) {
 							Application.Log.info("[No Approved Accounts found]");
 						}
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 					}
 					break;
@@ -184,8 +193,8 @@ public class CustomerMenu implements Menu {
 							break;
 						}
 
-						accountService.depositAccount(acct_id, cust_bank_id, deposit_amt);
-						transactionService.createTransaction( acct_id, cust_bank_id, "D", 0, 0, 0, 0, deposit_amt );
+// depositAccount creates a transaction
+						accountService.depositAccount(acct_id, cust_bank_id, deposit_amt, "XX");
 						
 						connection.commit();
 						
@@ -232,19 +241,19 @@ public class CustomerMenu implements Menu {
 							break;
 						}
 
-						accountService.withdrawAccount(acct_id, cust_bank_id, withdraw_amt);
-						transactionService.createTransaction( acct_id, cust_bank_id, "W", 0, 0, 0, 0, withdraw_amt );
+// withdrawAccount creates a transaction
+						accountService.withdrawAccount(acct_id, cust_bank_id, withdraw_amt, "XX");
 
 						connection.commit();
 						break;
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("{CustomerMenu] SQLException: " + e.getMessage());
 					}
 
 					try {
 						connection.rollback();
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("{CustomerMenu, rollback] SQLException: " + e.getMessage());
 					}
 					break;
 					
@@ -289,8 +298,8 @@ public class CustomerMenu implements Menu {
 							break;
 						}
 
-						accountService.withdrawAccount(acct_id_xfer_from, cust_bank_id, xfer_amt);
-						transactionService.createTransaction( acct_id_xfer_from, cust_bank_id, "TF", cust_id, acct_id_xfer_from, cust_id_to, acct_id_xfer_to, xfer_amt );
+						accountService.withdrawAccount(acct_id_xfer_from, cust_bank_id, xfer_amt, "TF");
+						transactionService.createTransaction( acct_id_xfer_from, cust_bank_id, "TF", cust_id, acct_id_xfer_from, cust_id_to, acct_id_xfer_to, xfer_amt, "TF" );
 						
 						sql = "SELECT count(*) ";
 						sql += "FROM bank.account ";
@@ -309,20 +318,20 @@ public class CustomerMenu implements Menu {
 							break;
 						}
 						
-						accountService.depositAccount(acct_id_xfer_to, cust_bank_id, xfer_amt);
-						transactionService.createTransaction( acct_id_xfer_to, cust_bank_id, "TT", cust_id, acct_id_xfer_from, cust_id_to, acct_id_xfer_to, xfer_amt );
+						accountService.depositAccount(acct_id_xfer_to, cust_bank_id, xfer_amt, "TT");
+						transactionService.createTransaction( acct_id_xfer_to, cust_bank_id, "TT", cust_id, acct_id_xfer_from, cust_id_to, acct_id_xfer_to, xfer_amt, "TT" );
 
 						connection.commit();
 
 						break;
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
 					}
 					
 					try {
 						connection.rollback();
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
 					}
 					break;
 					

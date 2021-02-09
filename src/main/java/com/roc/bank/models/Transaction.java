@@ -12,12 +12,13 @@ public class Transaction {
 	private static int tran_xfer_to_cust_id;
 	private static int tran_xfer_to_acct_id;
 	private static float tran_amt;
+	private static String xfer_type;
 	
 	public Transaction() {
 		super();
 	}
 
-	public static Transaction initializeTransaction( int tran_acct_id, int tran_bank_id, String tran_type, int tran_xfer_from_cust_id, int tran_xfer_from_acct_id, int tran_xfer_to_cust_id, int tran_xfer_to_acct_id, float tran_amt ) {
+	public static Transaction initializeTransaction( int tran_acct_id, int tran_bank_id, String tran_type, int tran_xfer_from_cust_id, int tran_xfer_from_acct_id, int tran_xfer_to_cust_id, int tran_xfer_to_acct_id, float tran_amt, String xfer_type ) {
 		Transaction.setTran_acct_id(tran_acct_id);
 		Transaction.setTran_bank_id(tran_bank_id);
 		Transaction.setTran_type(tran_type);
@@ -27,11 +28,12 @@ public class Transaction {
 		Transaction.setTran_xfer_to_acct_id(tran_xfer_to_acct_id);
 		Transaction.setTran_bank_id(tran_bank_id);
 		Transaction.setTran_amt(tran_amt);
+		Transaction.setXfer_type(xfer_type);
 		
 		Transaction transaction = new Transaction();
 		return transaction;
 	}
-	
+
 	public static int getTran_acct_id() { return tran_acct_id; }
 	public static void setTran_acct_id(int tran_acct_id) { Transaction.tran_acct_id = tran_acct_id; }
 
@@ -58,4 +60,7 @@ public class Transaction {
 	
 	public static float getTran_amt() { return tran_amt; }
 	public static void setTran_amt(float tran_amt) { Transaction.tran_amt = tran_amt; }
+	
+	public static String getXfer_type() { return xfer_type; }
+	public static void setXfer_type(String xfer_type) { Transaction.xfer_type = xfer_type; }
 }

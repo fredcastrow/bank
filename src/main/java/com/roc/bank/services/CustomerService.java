@@ -18,9 +18,9 @@ public class CustomerService {
 		customerDAO = new CustomerDAOImpl();
 	}
 	
-	public Customer createCustomer(int cust_bank_id, String cust_fname, String cust_lname, String cust_log_id, String cust_log_pw) {
+	public Customer createCustomer(int cust_bank_id, String cust_fname, String cust_lname, String cust_log_id, String cust_log_pw, String cust_email) {
 		Customer customer = new Customer();
-		customer = Customer.initializeCustomer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw);
+		customer = Customer.initializeCustomer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw, cust_email);
 		
 		try (Connection connection = ConnectionUtil.getConnection()) {
 // transaction control not in calling method and not needed as this is a single SQL INSER5T use case			

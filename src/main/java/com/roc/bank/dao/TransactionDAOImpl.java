@@ -42,13 +42,11 @@ public class TransactionDAOImpl implements TransactionDAO{
 			
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
-
-// FIX THIS
-// tran_acct_id = 0
-			Application.Log.info("tran_acct_id: " + Transaction.getTran_acct_id());
-			Application.Log.info("tran_type: " + Transaction.getTran_type());
-			
-			Application.Log.info("[TransactionDAOImpl] SQLException: " + e.getMessage());
+			if( e.getMessage().contains("ERROR: new row for relation \"transaction\" violates check constraint \"transaction_tran_amt_check\"")){
+				Application.Log.info("ERROR: Transaction amount can not be negative.");
+			}else {
+				Application.Log.info("[TransactionDAOImpl] SQLException: " + e.getMessage());
+			}
 		}
 
 		return count;

@@ -92,7 +92,7 @@ public class EmployeeMenu implements Menu{
 						}
 						
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[EmployeeMenu] SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 					}
 					break;
@@ -154,7 +154,7 @@ public class EmployeeMenu implements Menu{
 						}
 						
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[EmployeeMenu] SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 					}
 					break;
@@ -223,16 +223,19 @@ public class EmployeeMenu implements Menu{
 							account_count = pstmt.executeUpdate();
 							
 							connection.commit();
+
+							Application.Log.info( "[That is not an Account to be approved]");
+
 							break;
 						}
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("{EmployeeMenu] SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 					}
 					try {
 						connection.rollback();
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("{EmployeeMenu, rollback] SQLException: " + e.getMessage());
 					}
 					break;
 					
@@ -296,7 +299,7 @@ public class EmployeeMenu implements Menu{
 						}
 						
 					} catch (SQLException e) {
-						Application.Log.info("SQLException: " + e.getMessage());
+						Application.Log.info("[EmployeeMenu] SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 					}
 					break;
