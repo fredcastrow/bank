@@ -27,6 +27,8 @@ public class LoginMenu implements Menu{
 		int emp_id = 0;
 
 		do {
+			choice = 0;
+
 			Application.Log.info("");
 			Application.Log.info("=================");
 			Application.Log.info("[BANK LOGIN MENU]");
@@ -77,7 +79,7 @@ public class LoginMenu implements Menu{
 						rs = pstmt.executeQuery();
 						
 						if( !rs.next() ) {
-							Application.Log.info("[Invalid ID or Password]");
+							Application.Log.error("[Invalid Customer ID or Password]");
 							break;
 						} else {
 							cust_fname = rs.getString(1);
@@ -91,7 +93,7 @@ public class LoginMenu implements Menu{
 							customerMenu.display( cust_bank_id, cust_id );
 						}
 					} catch (SQLException e) {
-						Application.Log.info("[LoginMenu] SQLException: " + e.getMessage());
+						Application.Log.error("[LoginMenu] SQLException: " + e.getMessage());
 //						throw new SQLException("An issue occurred when trying to connect to the database");
 					}
 					break;
@@ -125,7 +127,7 @@ public class LoginMenu implements Menu{
 						
 						employee_found = rs.next();
 						if( !employee_found) {
-							Application.Log.info("[Invalid ID or Password]");
+							Application.Log.error("[Invalid Employee ID or Password]");
 							break;
 						}
 						
@@ -136,7 +138,7 @@ public class LoginMenu implements Menu{
 						
 						Application.Log.info("[Hello employee " + emp_fname + " " + emp_lname + "]");
 					} catch (SQLException e) {
-						Application.Log.info("[LoginMenu] SQLException: " + e.getMessage());
+						Application.Log.error("[LoginMenu] SQLException: " + e.getMessage());
 //						throw new SQLException("An issue occurred when trying to connect to the database");
 					}
 
@@ -144,7 +146,7 @@ public class LoginMenu implements Menu{
 						Menu employeeMenu = new EmployeeMenu();
 						employeeMenu.display( emp_id, emp_bank_id );
 					} else {
-						Application.Log.info("[Invalid ID or Password]");
+						Application.Log.error("[Invalid ID or Password]");
 					}
 					break;
 
@@ -171,12 +173,12 @@ public class LoginMenu implements Menu{
 					cust_bank_id = 1;
 					customerService.createCustomer(cust_bank_id, cust_fname, cust_lname, cust_log_id, cust_log_pw, cust_email);
 
-					Application.Log.info("[Customer " + cust_fname + " " + cust_lname +" created]");
-					Application.Log.info("++++++++++++++++++++++++++++++");
+//					Application.Log.info("[Customer " + cust_fname + " " + cust_lname +" created]");
+//					Application.Log.info("++++++++++++++++++++++++++++++");
 					break;
 					
 				default:
-					Application.Log.info("[No valid choice entered, please try again]");
+					Application.Log.error("[No valid choice entered, please try again]");
 			}
 		} while (choice != 1);
 	}

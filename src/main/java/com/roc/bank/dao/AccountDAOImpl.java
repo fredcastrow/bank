@@ -30,9 +30,9 @@ public class AccountDAOImpl implements AccountDAO{
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
 			if( e.getMessage().contains("ERROR: new row for relation \"account\" violates check constraint \"account_acct_initial_deposit_amt_check\"")){
-				Application.Log.info("ERROR: Initial Balance can not be negative.");
+				Application.Log.error("[AcctountDAOImpl] Initial Balance can not be negative.");
 			}else {
-				Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+				Application.Log.error("[AcctountDAOImpl] SQLException: " + e.getMessage());
 			}
 			return 0;
 		}
@@ -61,9 +61,9 @@ public class AccountDAOImpl implements AccountDAO{
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
 			if( e.getMessage().contains("ERROR: new row for relation \"account\" violates check constraint \"account_acct_current_bal_check\"")) {
-				Application.Log.info("Account Balance can not be negative");
+				Application.Log.error("[AcctountDAOImpl] Account Balance can not be negative");
 			}else {
-				Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+				Application.Log.error("[AcctountDAOImpl] SQLException: " + e.getMessage());
 			}
 		}
 		
@@ -87,9 +87,9 @@ public class AccountDAOImpl implements AccountDAO{
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
 			if( e.getMessage().contains("ERROR: new row for relation \"account\" violates check constraint \"account_acct_current_bal_check\"")) {
-				Application.Log.info("Account Balance can not be negative");
+				Application.Log.error("[AcctountDAOImpl] Account Balance can not be negative");
 			}else {
-				Application.Log.info("[AcctountDAOImpl] SQLException: " + e.getMessage());
+				Application.Log.error("[AcctountDAOImpl] SQLException: " + e.getMessage());
 			}
 		}
 		

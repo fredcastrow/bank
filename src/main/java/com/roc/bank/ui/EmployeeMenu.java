@@ -128,9 +128,9 @@ public class EmployeeMenu implements Menu{
 							account_count ++;
 							if( account_count == 1 ) {
 								Application.Log.info("");
-								Application.Log.info("===========[Customer Account List]=========");
-								Application.Log.info("CustID CustName AcctID AcctBal AcctApproved AcctType");
-								Application.Log.info("-------------------------------------------");
+								Application.Log.info("======================[Customer Account List]====================");
+								Application.Log.info("CustID CustName    AcctID  AcctBal    AcctApproved       AcctType");
+								Application.Log.info("-----------------------------------------------------------------");
 							}
 							
 							cust_id = rs.getInt(1);
@@ -147,9 +147,17 @@ public class EmployeeMenu implements Menu{
 								acct_status = "NOT Approved";
 							}
 							
-							Application.Log.info("[" +cust_id + "]    " + cust_fname + " " + cust_lname + "    [" + acct_id + "]   " + acct_initial_deposit_amt + "    [" + acct_status + "]" + "    [" + acct_type + "]");
+							String acct_type_desc = "Unknown";
+							if( acct_type.equals("C")) {
+								acct_type_desc = "Checking";
+							}else if( acct_type.equals("S")) {
+								acct_type_desc = "Savings ";
+							}
+							
+							
+							Application.Log.info("[" +cust_id + "]    " + cust_fname + " " + cust_lname + "    [" + acct_id + "]   " + acct_initial_deposit_amt + "    [" + acct_status + "]" + "    [" + acct_type_desc + "]");
 						}
-						Application.Log.info("===========================================");
+						Application.Log.info("=================================================================");
 						
 						if( account_count == 0 ) {
 							Application.Log.info("[No Accounts found for Customer [" + cust_id + "]]");
@@ -193,6 +201,7 @@ public class EmployeeMenu implements Menu{
 							acct_initial_deposit_amt = rs.getFloat(1); 
 						}
 						
+						Application.Log.info("account_count=" + account_count);
 						if( account_count == 0 ) {
 							Application.Log.info( "[That is not an Account to be approved]");
 							break;

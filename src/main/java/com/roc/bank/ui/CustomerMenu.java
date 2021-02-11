@@ -46,6 +46,7 @@ public class CustomerMenu implements Menu {
 
 		int choice = 0;
 		do {
+			choice = 0;
 			Application.Log.info("");
 			Application.Log.info("===============");
 			Application.Log.info("[CUSTOMER MENU]");
@@ -84,9 +85,9 @@ public class CustomerMenu implements Menu {
 						acct_initial_deposit_amt = Float.parseFloat(Application.sc.nextLine());
 					}catch (NumberFormatException e) {
 						if( e.getMessage().contains("For input string:")) {
-							Application.Log.info("[ERROR] [CustomerMenu]: Initial Deposit Amount must be a number]");
+							Application.Log.warn("[ERROR] [CustomerMenu]: Initial Deposit Amount must be a number]");
 						}else {
-							Application.Log.info("[CustomerMenu]: " + e.getMessage());
+							Application.Log.error("[CustomerMenu]: " + e.getMessage());
 						}
 						break;
 					}
@@ -108,19 +109,15 @@ public class CustomerMenu implements Menu {
 						transactionService.createTransaction( acct_id, cust_bank_id, "O", 0, 0, 0, 0, acct_initial_deposit_amt, "" );
 						
 					} catch (SQLException e) {
-//						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
 						Application.Log.error("[CustomerMenu] SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 						break;
 					}
-					
-//					Application.Log.info("[Account Request created:  Check back later to for approval status]");
-//					Application.Log.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
 					break;
 					
 				case 3:
 					try {
+/*						
 						sql = "SELECT Count(*) as AccountCount ";
 						sql += "FROM bank.account ";
 						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE AND acct_type = ?";
@@ -129,11 +126,19 @@ public class CustomerMenu implements Menu {
 						pstmt.setInt(2, cust_id);
 						pstmt.setString(3, acct_type);
 						rs = pstmt.executeQuery();
+*/
+						sql = "SELECT Count(*) as AccountCount ";
+						sql += "FROM bank.account ";
+						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE";
+						pstmt = connection.prepareStatement(sql);
+						pstmt.setInt(1, cust_bank_id);
+						pstmt.setInt(2, cust_id);
+						rs = pstmt.executeQuery();
 
 						rs.next();
 						account_count = rs.getInt(1);
 						if( account_count == 0 ) {
-							Application.Log.info("[No approved accounts found]");
+							Application.Log.warn("[No approved accounts found]");
 							break;
 						}else {
 							account_count = rs.getInt(1);
@@ -162,8 +167,8 @@ public class CustomerMenu implements Menu {
 							acct_id = rs.getInt(1);
 							acct_initial_deposit_amt = rs.getFloat(2);
 							acct_type = rs.getString(3);
+
 							String acct_type_desc = "Unknown";
-							
 							if( acct_type.equals("C")) {
 								acct_type_desc = "Checking";
 							}else if( acct_type.equals("S")) {
@@ -173,10 +178,10 @@ public class CustomerMenu implements Menu {
 							Application.Log.info( "Account ID: " + acct_id + "  Type: " + acct_type_desc + "  Balance = " + acct_initial_deposit_amt );
 						}
 						if( account_count == 0) {
-							Application.Log.info("[No Approved Accounts found]");
+							Application.Log.warn("[CustomerMenu] [No Approved Accounts found]");
 						}
 					} catch (SQLException e) {
-						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
+						Application.Log.error("[CustomerMenu] SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 					}
 					break;
@@ -188,8 +193,10 @@ public class CustomerMenu implements Menu {
 							Application.Log.info("Enter Account ID to Deposit to:");
 							acct_id = Integer.parseInt(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
-							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Account ID must be a number");
-							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							if( e.getMessage().contains("For input string:")) { 
+								Application.Log.warn("[ERROR] [CustomerMenu]: Account ID must be a number");
+							}else { 
+								Application.Log.error("[CustomerMenu]: " + e.getMessage()); }
 							break;
 						}
 							
@@ -198,9 +205,9 @@ public class CustomerMenu implements Menu {
 							deposit_amt = Float.parseFloat(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
 							if( e.getMessage().contains("For input string:")) {
-								Application.Log.info("[ERROR] [CustomerMenu]: Deposit Amount must be a number");
+								Application.Log.warn("[ERROR] [CustomerMenu]: Deposit Amount must be a number");
 							}else {
-								Application.Log.info("[CustomerMenu]: " + e.getMessage());
+								Application.Log.error("[CustomerMenu]: " + e.getMessage());
 							}
 							break;
 						}
@@ -219,7 +226,7 @@ public class CustomerMenu implements Menu {
 						rs.next();
 						account_count = rs.getInt(1);
 						if( account_count == 0) {
-							Application.Log.info("[Deposit Rejected.  Account " + "(" + acct_id + ") is not an approved account]");
+							Application.Log.warn("[Deposit Rejected.  Account " + "(" + acct_id + ") is not an approved account]");
 							break;
 						}
 
@@ -230,13 +237,13 @@ public class CustomerMenu implements Menu {
 						
 						break;
 					} catch (SQLException e) {
-						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
+						Application.Log.error("[CustomerMenu] SQLException: " + e.getMessage());
 					}
 					
 					try {
 						connection.rollback();
 					} catch (SQLException e) {
-						Application.Log.info("[CustomerMenu. rollback] SQLException: " + e.getMessage());
+						Application.Log.error("[CustomerMenu. rollback] SQLException: " + e.getMessage());
 						break;
 					}
 					Application.Log.info("[Deposit Complete]");
@@ -252,9 +259,9 @@ public class CustomerMenu implements Menu {
 							acct_id = Integer.parseInt(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
 							if( e.getMessage().contains("For input string:")) {
-								Application.Log.info("[ERROR] [CustomerMenu]: Account ID must be a number");
+								Application.Log.warn("[ERROR] [CustomerMenu]: Account ID must be a number");
 							}else {
-								Application.Log.info("[CustomerMenu]: " + e.getMessage());
+								Application.Log.error("[CustomerMenu]: " + e.getMessage());
 							}
 							break;
 						}
@@ -264,9 +271,9 @@ public class CustomerMenu implements Menu {
 							withdraw_amt = Float.parseFloat(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
 							if( e.getMessage().contains("For input string:")) {
-								Application.Log.info("[ERROR] [CustomerMenu]: Deposit Amount must be a number");
+								Application.Log.warn("[ERROR] [CustomerMenu]: Deposit Amount must be a number");
 							}else {
-								Application.Log.info("[CustomerMenu]: " + e.getMessage());
+								Application.Log.error("[CustomerMenu]: " + e.getMessage());
 							}
 							break;
 						}
@@ -285,7 +292,7 @@ public class CustomerMenu implements Menu {
 						rs.next();
 						account_count = rs.getInt(1);
 						if( account_count == 0) {
-							Application.Log.info("[Withddrawal Rejected.  Account " + "(" + acct_id + ") is not an approved account]");
+							Application.Log.warn("[Withddrawal Rejected.  Account " + "(" + acct_id + ") is not an approved account]");
 							break;
 						}
 
@@ -295,13 +302,13 @@ public class CustomerMenu implements Menu {
 						connection.commit();
 						break;
 					} catch (SQLException e) {
-						Application.Log.info("{CustomerMenu] SQLException: " + e.getMessage());
+						Application.Log.error("{CustomerMenu] SQLException: " + e.getMessage());
 					}
 
 					try {
 						connection.rollback();
 					} catch (SQLException e) {
-						Application.Log.info("{CustomerMenu, rollback] SQLException: " + e.getMessage());
+						Application.Log.error("{CustomerMenu, rollback] SQLException: " + e.getMessage());
 					}
 					break;
 					
@@ -311,30 +318,15 @@ public class CustomerMenu implements Menu {
 					float xfer_amt = 0;
 					
 					try {
-/*						
-						Application.Log.info("Enter Account ID to Transfer FROM:");
-						try {acct_id_xfer_from = Integer.parseInt(Application.sc.nextLine());
-						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
-						
-						Application.Log.info("Enter Customer ID to Transfer TO:");
-						try {cust_id_to = Integer.parseInt(Application.sc.nextLine());
-						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
-						
-						Application.Log.info("Enter Account ID to Transfer TO:");
-						try {acct_id_xfer_to = Integer.parseInt(Application.sc.nextLine());
-						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
-						
-						Application.Log.info("Enter Amount to Transfer:");
-						try {xfer_amt = Float.parseFloat(Application.sc.nextLine());
-						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
-*/
-						
+
 						try {
 							Application.Log.info("Enter Account ID to Transfer FROM:");
 							acct_id_xfer_from = Integer.parseInt(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
-							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Transfer FROM Account ID must be a number");
-							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							if( e.getMessage().contains("For input string:")) { 
+								Application.Log.warn("[ERROR] [CustomerMenu]: Transfer FROM Account ID must be a number");
+							}else { 
+								Application.Log.error("[CustomerMenu]: " + e.getMessage()); }
 							break;
 						}
 						
@@ -342,8 +334,10 @@ public class CustomerMenu implements Menu {
 							Application.Log.info("Enter Customer ID to Transfer TO:");
 							cust_id_to = Integer.parseInt(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
-							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Transfer TO Customer ID must be a number");
-							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							if( e.getMessage().contains("For input string:")) { 
+								Application.Log.warn("[ERROR] [CustomerMenu]: Transfer TO Customer ID must be a number");
+							}else { 
+								Application.Log.error("[CustomerMenu]: " + e.getMessage()); }
 							break;
 						}
 						
@@ -351,8 +345,10 @@ public class CustomerMenu implements Menu {
 							Application.Log.info("Enter Account ID to Transfer TO:");
 							acct_id_xfer_to = Integer.parseInt(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
-							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Transfer TO Account ID must be a number");
-							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							if( e.getMessage().contains("For input string:")) { 
+								Application.Log.warn("[ERROR] [CustomerMenu]: Transfer TO Account ID must be a number");
+							}else { 
+								Application.Log.error("[CustomerMenu]: " + e.getMessage()); }
 							break;
 						}
 						
@@ -360,8 +356,10 @@ public class CustomerMenu implements Menu {
 							Application.Log.info("Enter Amount to Transfer:");
 							xfer_amt = Float.parseFloat(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
-							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Transfer Amount must be a number");
-							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							if( e.getMessage().contains("For input string:")) { 
+								Application.Log.warn("[ERROR] [CustomerMenu]: Transfer Amount must be a number");
+							}else { 
+								Application.Log.error("[CustomerMenu]: " + e.getMessage()); }
 							break;
 						}
 						
@@ -379,11 +377,10 @@ public class CustomerMenu implements Menu {
 						account_count = 0;
 						
 						rs.next();
+						account_count = rs.getInt(1);
 						
-						Application.Log.info("account count from(2) " + account_count);  
-
 						if( account_count == 0) {
-							Application.Log.info("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to Transfer FROM]");
+							Application.Log.warn("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to Transfer FROM]");
 							connection.rollback();
 							break;
 						}
@@ -407,11 +404,10 @@ public class CustomerMenu implements Menu {
 						account_count = rs.getInt(1);
 
 						if( account_count == 0) {
-							Application.Log.info("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to transfer TO]");
+							Application.Log.warn("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to transfer TO]");
 							connection.rollback();
 							break;
 						}
-						Application.Log.info("TT:" + acct_id_xfer_to);
 						accountService.depositAccount(acct_id_xfer_to, cust_bank_id, xfer_amt, "TT");
 						transactionService.createTransaction( acct_id_xfer_to, cust_bank_id, "TT", cust_id, acct_id_xfer_from, cust_id_to, acct_id_xfer_to, xfer_amt, "TT" );
 
@@ -419,13 +415,13 @@ public class CustomerMenu implements Menu {
 
 						break;
 					} catch (SQLException e) {
-						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
+						Application.Log.error("[CustomerMenu] SQLException: " + e.getMessage());
 					}
 					
 					try {
 						connection.rollback();
 					} catch (SQLException e) {
-						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
+						Application.Log.error("[CustomerMenu] SQLException: " + e.getMessage());
 					}
 					break;
 					

@@ -32,8 +32,15 @@ public class CustomerDAOImpl implements CustomerDAO{
 			
 			count = pstmt.executeUpdate();
 		} catch (SQLException e) {
-			Application.Log.info("[CustomerDAOImpl] SQLException: " + e.getMessage());
+			if( e.getMessage().contains("duplicate key value violates unique constraint \"customer_cust_log_id_key\"")) {
+				Application.Log.warn("[CustomerDAOImpl]: This Customer Login ID is already used.  Login ID must be unique.]");
+			}else {
+				Application.Log.error("[CustomerDAOImpl] SQLException: " + e.getMessage());
+			}
+			return 0;
 		}
+		Application.Log.info("[Customer " + Customer.getCust_fname() + " " + Customer.getCust_lname() +" created]");
+		Application.Log.info("++++++++++++++++++++++++++++++");
 		
 		count = 1;
 		return count;
