@@ -56,8 +56,8 @@ public class CustomerMenu implements Menu {
 			Application.Log.info("4.) Make a Deposit");
 			Application.Log.info("5.) Make a Withdrawal");
 			Application.Log.info("6.) Transfer Money");
-			Application.Log.info("7.) Receive Money");
-			Application.Log.info("[Enter a choice between 1 and 7]");
+//			Application.Log.info("7.) Receive Money");
+			Application.Log.info("[Enter a choice between 1 and 6]");
 
 			try {
 				choice = Integer.parseInt(Application.sc.nextLine());
@@ -141,8 +141,8 @@ public class CustomerMenu implements Menu {
 						
 						sql = "SELECT acct_id, acct_current_bal, acct_type ";
 						sql += "FROM bank.account ";
-						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE" ;
-//						sql += "ORDER BY acct_id";
+						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_approved = TRUE " ;
+						sql += "ORDER BY acct_id ASC";
 						pstmt = connection.prepareStatement(sql);
 						pstmt.setInt(1, cust_bank_id);
 						pstmt.setInt(2, cust_id);
@@ -188,11 +188,8 @@ public class CustomerMenu implements Menu {
 							Application.Log.info("Enter Account ID to Deposit to:");
 							acct_id = Integer.parseInt(Application.sc.nextLine());
 						}catch (NumberFormatException e) {
-							if( e.getMessage().contains("For input string:")) {
-								Application.Log.info("[ERROR] [CustomerMenu]: Account ID must be a number");
-							}else {
-								Application.Log.info("[CustomerMenu]: " + e.getMessage());
-							}
+							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Account ID must be a number");
+							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
 							break;
 						}
 							
@@ -314,6 +311,7 @@ public class CustomerMenu implements Menu {
 					float xfer_amt = 0;
 					
 					try {
+/*						
 						Application.Log.info("Enter Account ID to Transfer FROM:");
 						try {acct_id_xfer_from = Integer.parseInt(Application.sc.nextLine());
 						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
@@ -329,7 +327,44 @@ public class CustomerMenu implements Menu {
 						Application.Log.info("Enter Amount to Transfer:");
 						try {xfer_amt = Float.parseFloat(Application.sc.nextLine());
 						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
-
+*/
+						
+						try {
+							Application.Log.info("Enter Account ID to Transfer FROM:");
+							acct_id_xfer_from = Integer.parseInt(Application.sc.nextLine());
+						}catch (NumberFormatException e) {
+							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Transfer FROM Account ID must be a number");
+							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							break;
+						}
+						
+						try {
+							Application.Log.info("Enter Customer ID to Transfer TO:");
+							cust_id_to = Integer.parseInt(Application.sc.nextLine());
+						}catch (NumberFormatException e) {
+							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Transfer TO Customer ID must be a number");
+							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							break;
+						}
+						
+						try {
+							Application.Log.info("Enter Account ID to Transfer TO:");
+							acct_id_xfer_to = Integer.parseInt(Application.sc.nextLine());
+						}catch (NumberFormatException e) {
+							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Transfer TO Account ID must be a number");
+							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							break;
+						}
+						
+						try {
+							Application.Log.info("Enter Amount to Transfer:");
+							xfer_amt = Float.parseFloat(Application.sc.nextLine());
+						}catch (NumberFormatException e) {
+							if( e.getMessage().contains("For input string:")) { Application.Log.info("[ERROR] [CustomerMenu]: Transfer Amount must be a number");
+							}else { Application.Log.info("[CustomerMenu]: " + e.getMessage()); }
+							break;
+						}
+						
 						connection.setAutoCommit(false);
 						
 						sql = "SELECT count(*) ";
@@ -341,10 +376,14 @@ public class CustomerMenu implements Menu {
 						pstmt.setInt(3, acct_id_xfer_from);
 						rs = pstmt.executeQuery();
 
+						account_count = 0;
+						
 						rs.next();
-						account_count = rs.getInt(1);
+						
+						Application.Log.info("account count from(2) " + account_count);  
+
 						if( account_count == 0) {
-							Application.Log.info("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to transfer from]");
+							Application.Log.info("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to Transfer FROM]");
 							connection.rollback();
 							break;
 						}
@@ -356,19 +395,23 @@ public class CustomerMenu implements Menu {
 						sql += "FROM bank.account ";
 						sql += "WHERE acct_bank_id = ? AND acct_cust_own_id = ? AND acct_owner_type = 'C' AND acct_id = ? AND acct_approved = TRUE";
 						pstmt = connection.prepareStatement(sql);
+						
 						pstmt.setInt(1, cust_bank_id);
 						pstmt.setInt(2, cust_id_to);
 						pstmt.setInt(3, acct_id_xfer_to);
 						rs = pstmt.executeQuery();
 
+						account_count = 0;
+
 						rs.next();
 						account_count = rs.getInt(1);
+
 						if( account_count == 0) {
-							Application.Log.info("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to transfer to]");
+							Application.Log.info("[Transfer Rejected.  Account " + "(" + acct_id + ") is not an approved account to transfer TO]");
 							connection.rollback();
 							break;
 						}
-						
+						Application.Log.info("TT:" + acct_id_xfer_to);
 						accountService.depositAccount(acct_id_xfer_to, cust_bank_id, xfer_amt, "TT");
 						transactionService.createTransaction( acct_id_xfer_to, cust_bank_id, "TT", cust_id, acct_id_xfer_from, cust_id_to, acct_id_xfer_to, xfer_amt, "TT" );
 
