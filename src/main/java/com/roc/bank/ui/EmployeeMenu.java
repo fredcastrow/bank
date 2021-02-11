@@ -5,11 +5,12 @@ import com.roc.bank.util.ConnectionUtil;
 import com.roc.bank.exceptions.DatabaseConnectionException;
 
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-//import java.time.LocalDate;
-//import java.time.format.DateTimeFormatter;
-import java.util.TimeZone;
+import java.time.LocalDate;
+//import java.text.DateFormat;
+//import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+//import java.util.TimeZone;
 
 public class EmployeeMenu implements Menu{
 
@@ -101,6 +102,7 @@ public class EmployeeMenu implements Menu{
 					String cust_fname = "", cust_lname = "";
 					boolean acct_approved;
 					String acct_status, acct_type;
+					account_count = 0;
 					
 					try {
 						connection = ConnectionUtil.getConnection();
@@ -224,7 +226,7 @@ public class EmployeeMenu implements Menu{
 							
 							connection.commit();
 
-							Application.Log.info( "[That is not an Account to be approved]");
+							Application.Log.info( "[Account Approved]");
 
 							break;
 						}
@@ -243,7 +245,7 @@ public class EmployeeMenu implements Menu{
 					int transaction_count = 0;
 					int tran_id = 0;
 					int tran_acct_id = 0;
-					Date tran_date;
+//					LocalDateTime tran_date;
 					String tran_type;
 					int tran_transfer_from_cust_id, tran_transfer_to_cust_id;
 					int tran_transfer_from_acct_id, tran_transfer_to_acct_id;
@@ -270,14 +272,21 @@ public class EmployeeMenu implements Menu{
 							transaction_count ++;
 							if( transaction_count == 1 ) {
 								Application.Log.info("");
-								Application.Log.info("==================================[Transaction List]=================================");
-								Application.Log.info("TranID AcctID TranDate       TranType XferFrom(user, acct) XferTo(user, acct) TranAmt");
-								Application.Log.info("-------------------------------------------------------------------------------------");
+								Application.Log.info("=========================================[Transaction List]============================================");
+								Application.Log.info("TranID AcctID          TranDate          TranType       XferFrom(user, acct) XferTo(user, acct) TranAmt");
+								Application.Log.info("-------------------------------------------------------------------------------------------------------");
 							}
 							
 							tran_id = rs.getInt(1);
 							tran_acct_id = rs.getInt(2);
-							tran_date = rs.getDate(3);
+							
+							Timestamp tran_date;
+							tran_date = rs.getTimestamp(3);
+
+//							DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+//							LocalDateTime localDateTime = rs.getObject(3, LocalDateTime.class);
+//							localDateTime.parse( localDateTime., localDateTime));
+							
 							tran_type = rs.getString(4);
 							tran_transfer_from_cust_id = rs.getInt(5);
 							tran_transfer_from_acct_id = rs.getInt(6);
@@ -285,14 +294,26 @@ public class EmployeeMenu implements Menu{
 							tran_transfer_to_acct_id = rs.getInt(8);
 							tran_amt = rs.getFloat(9);
 
+/*							
 							TimeZone tz = TimeZone.getTimeZone("UTC");
 							DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm"); // Quoted "Z" to indicate UTC, no timezone offset
 							df.setTimeZone(tz);
 							String nowAsISO = df.format(tran_date);
+*/
 
-							Application.Log.info(" [" +tran_id + "]      " + tran_acct_id + "     " + nowAsISO + " [" + tran_type + "]      " + tran_transfer_from_cust_id + " " + tran_transfer_from_acct_id + "                  " + tran_transfer_to_cust_id + " " + tran_transfer_to_acct_id + "             " + tran_amt);
+/*							
+							java.util.Date aDate = new java.util.Date();
+							java.util.Date aTime = new java.util.Date();
+							
+//							LocalDateTime myDateObj = LocalDateTime.now();
+							LocalDateTime myDateObj = LocalDateTime.of(tran_date);
+							DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+//						    DateFormat myDateObj = new DateTimeFormatter();
+							String formattedDate = myDateObj.format(myFormatObj);
+*/							
+							Application.Log.info(" [" +tran_id + "]      " + tran_acct_id + "     " + tran_date + "    [" + tran_type + "]             " + tran_transfer_from_cust_id + " " + tran_transfer_from_acct_id + "                  " + tran_transfer_to_cust_id + " " + tran_transfer_to_acct_id + "             " + tran_amt);
 						}
-						Application.Log.info("=====================================================================================");
+						Application.Log.info("=======================================================================================================");
 						
 						if( transaction_count == 0 ) {
 							Application.Log.info("[No Transactions found]");

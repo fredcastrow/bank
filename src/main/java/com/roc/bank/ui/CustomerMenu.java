@@ -70,12 +70,27 @@ public class CustomerMenu implements Menu {
 					
 				case 2:
 //					String account = getCreateAccountInput();
+					Float acct_initial_deposit_amt = 0f;
 					
-					Application.Log.info("Enter Account Type (C = Checking, S = Savings:");
+					Application.Log.info("Enter Account Type (C = Checking, S = Savings)");
 					acct_type = Application.sc.nextLine();
+					acct_type = acct_type.toUpperCase();
 
 					Application.Log.info("Enter Initial Deposit Amount:");
-					float acct_initial_deposit_amt = Float.parseFloat(Application.sc.nextLine());
+
+//					acct_initial_deposit_amt = Float.parseFloat(Application.sc.nextLine());
+					
+					try {
+						acct_initial_deposit_amt = Float.parseFloat(Application.sc.nextLine());
+					}catch (NumberFormatException e) {
+						if( e.getMessage().contains("For input string:")) {
+							Application.Log.info("[ERROR] [CustomerMenu]: Initial Deposit Amount must be a number]");
+						}else {
+							Application.Log.info("[CustomerMenu]: " + e.getMessage());
+						}
+						break;
+					}
+					
 
 					accountService.createAccount(cust_bank_id, cust_id, acct_initial_deposit_amt, acct_type);
 
@@ -93,7 +108,8 @@ public class CustomerMenu implements Menu {
 						transactionService.createTransaction( acct_id, cust_bank_id, "O", 0, 0, 0, 0, acct_initial_deposit_amt, "" );
 						
 					} catch (SQLException e) {
-						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
+//						Application.Log.info("[CustomerMenu] SQLException: " + e.getMessage());
+						Application.Log.error("[CustomerMenu] SQLException: " + e.getMessage());
 		//				throw new SQLException("An issue occurred when trying to connect to.
 						break;
 					}
@@ -132,7 +148,7 @@ public class CustomerMenu implements Menu {
 						pstmt.setInt(2, cust_id);
 						rs = pstmt.executeQuery();
 						
-						acct_initial_deposit_amt = 0;
+						acct_initial_deposit_amt = 0f;
 						
 						account_count = 0;
 						while( rs.next() ){
@@ -167,13 +183,30 @@ public class CustomerMenu implements Menu {
 					
 				case 4:
 					try {
-						Application.Log.info("Enter Account ID to Deposit to:");
-						try {acct_id = Integer.parseInt(Application.sc.nextLine());
-						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
-						
-						Application.Log.info("Enter Amount to Deposit:");
-						try {deposit_amt = Float.parseFloat(Application.sc.nextLine());
-						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
+
+						try {
+							Application.Log.info("Enter Account ID to Deposit to:");
+							acct_id = Integer.parseInt(Application.sc.nextLine());
+						}catch (NumberFormatException e) {
+							if( e.getMessage().contains("For input string:")) {
+								Application.Log.info("[ERROR] [CustomerMenu]: Account ID must be a number");
+							}else {
+								Application.Log.info("[CustomerMenu]: " + e.getMessage());
+							}
+							break;
+						}
+							
+						try {
+							Application.Log.info("Enter Amount to Deposit:");
+							deposit_amt = Float.parseFloat(Application.sc.nextLine());
+						}catch (NumberFormatException e) {
+							if( e.getMessage().contains("For input string:")) {
+								Application.Log.info("[ERROR] [CustomerMenu]: Deposit Amount must be a number");
+							}else {
+								Application.Log.info("[CustomerMenu]: " + e.getMessage());
+							}
+							break;
+						}
 						
 						connection.setAutoCommit(false);
 
@@ -216,13 +249,31 @@ public class CustomerMenu implements Menu {
 					
 				case 5:
 					try {
-						Application.Log.info("Enter Account ID to Withdraw from:");
-						try {acct_id = Integer.parseInt(Application.sc.nextLine());
-						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
 						
-						Application.Log.info("Enter Amount to Withdraw:");
-						try {withdraw_amt = Float.parseFloat(Application.sc.nextLine());
-						} catch (NumberFormatException e) {Application.Log.info("parseInt exception: " + e.getMessage());}
+						try {
+							Application.Log.info("Enter Account ID to Withdraw from:");
+							acct_id = Integer.parseInt(Application.sc.nextLine());
+						}catch (NumberFormatException e) {
+							if( e.getMessage().contains("For input string:")) {
+								Application.Log.info("[ERROR] [CustomerMenu]: Account ID must be a number");
+							}else {
+								Application.Log.info("[CustomerMenu]: " + e.getMessage());
+							}
+							break;
+						}
+							
+						try {
+							Application.Log.info("Enter Amount to Withdraw:");
+							withdraw_amt = Float.parseFloat(Application.sc.nextLine());
+						}catch (NumberFormatException e) {
+							if( e.getMessage().contains("For input string:")) {
+								Application.Log.info("[ERROR] [CustomerMenu]: Deposit Amount must be a number");
+							}else {
+								Application.Log.info("[CustomerMenu]: " + e.getMessage());
+							}
+							break;
+						}
+						
 						
 						connection.setAutoCommit(false);
 						sql = "SELECT count(*) ";
