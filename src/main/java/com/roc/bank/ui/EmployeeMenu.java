@@ -27,6 +27,7 @@ public class EmployeeMenu implements Menu{
 
 		int choice = 0;
 		do {
+			choice = 0;
 			Application.Log.info("");
 			Application.Log.info("===============");
 			Application.Log.info("[EMPLOYEE MENU]");
@@ -201,7 +202,6 @@ public class EmployeeMenu implements Menu{
 							acct_initial_deposit_amt = rs.getFloat(1); 
 						}
 						
-						Application.Log.info("account_count=" + account_count);
 						if( account_count == 0 ) {
 							Application.Log.info( "[That is not an Account to be approved]");
 							break;
@@ -291,6 +291,15 @@ public class EmployeeMenu implements Menu{
 							
 							Timestamp tran_date;
 							tran_date = rs.getTimestamp(3);
+							
+/*							
+							Date date = new Date();
+							date.setTime(ts.getTime());
+							String formattedDate = new SimpleDateFormat("yyyyMMdd").format(date);
+							
+							String formatted_date;
+							formatted_date = tran_date.toString();
+*/							
 
 //							DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 //							LocalDateTime localDateTime = rs.getObject(3, LocalDateTime.class);
@@ -320,7 +329,7 @@ public class EmployeeMenu implements Menu{
 //						    DateFormat myDateObj = new DateTimeFormatter();
 							String formattedDate = myDateObj.format(myFormatObj);
 */							
-							Application.Log.info(" [" +tran_id + "]      " + tran_acct_id + "     " + tran_date + "    [" + tran_type + "]             " + tran_transfer_from_cust_id + " " + tran_transfer_from_acct_id + "                  " + tran_transfer_to_cust_id + " " + tran_transfer_to_acct_id + "             " + tran_amt);
+							Application.Log.info(" [" +tran_id + "]      " + tran_acct_id + "     " + tran_date +  "    [" + tran_type + "]             " + tran_transfer_from_cust_id + " " + tran_transfer_from_acct_id + "                  " + tran_transfer_to_cust_id + " " + tran_transfer_to_acct_id + "             " + tran_amt);
 						}
 						Application.Log.info("=======================================================================================================");
 						
@@ -335,7 +344,8 @@ public class EmployeeMenu implements Menu{
 					break;
 					
 				default:
-					Application.Log.info("[No valid choice entered, please try again]");
+					Application.Log.info("[EmployeeMenu] [No valid choice entered, please try again]");
+					break;
 
 			}
 		} while (choice != 1);

@@ -430,7 +430,7 @@ public class CustomerMenu implements Menu {
 					break;
 					
 				default:
-					Application.Log.info("[No valid choice entered, please try again]");
+					Application.Log.info("[CustomerMenu] [No valid choice entered, please try again]");
 					break;
 			}
 		} while (choice != 1);

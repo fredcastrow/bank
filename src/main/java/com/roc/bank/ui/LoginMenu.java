@@ -178,7 +178,7 @@ public class LoginMenu implements Menu{
 					break;
 					
 				default:
-					Application.Log.error("[No valid choice entered, please try again]");
+					Application.Log.error("[LoginMenu] [No valid choice entered, please try again]");
 			}
 		} while (choice != 1);
 	}
